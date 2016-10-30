@@ -93,7 +93,7 @@ ClientMySQL.prototype.updateDisplayGame = function( id )
 ClientMySQL.prototype.deleteFailGames = function()
 {
     var deleteQuery = 'DELETE FROM game WHERE is_broken=0;';
-    this.executeQuery( deleteQuery, this.checkQuery );
+  //  this.executeQuery( deleteQuery, this.checkQuery );
 };
 
 ClientMySQL.prototype.orderContent = function( callback )

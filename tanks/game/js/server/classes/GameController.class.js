@@ -6,19 +6,22 @@ var DataForTransmission = require( './utils/DataForTransmission.class' );
 
 var GameController = function()
 {
-    this.db           = new DbClient();
-    this.battleFields = new Array();
-    this.battleType   = null;
-    this.countOfBots  = 0;
-    this.mapType      = false;
-    this.view         = false;
-    this.intervals    = new Array();
+    this.db                     = new DbClient();
+    this.battleFields           = {}; // map container
+    this.view                   = false;
+    this.intervals              = new Array();
+    this.asyncDbOperationResult =
+    {
+        battleType: null,
+        countOfBots: 0,
+        mapType: false
+    };
 };
 
 GameController.prototype.prepareGame = function( gameId )
 {
     var exist = false;
-    if ( this.battleFields.length != 0 )
+    if ( Object.keys( this.battleFields ).length != 0 )
     {
         exist = this._tryAddPlayer( gameId );
     }
@@ -32,11 +35,10 @@ GameController.prototype.prepareGame = function( gameId )
 GameController.prototype._tryAddPlayer = function( gameId )
 {
     var exist = false;
-    var i = this.getBattleField( gameId );
 
-    if ( this.battleFields[i] != null )
+    if ( this.battleFields[gameId] )
     {
-        var gamerId = this.battleFields[i].getNewGamerId();
+        var gamerId = this.battleFields[gameId].getNewGamerId();
         if ( gamerId >= settings.MAX_GAMER )
         {
             this._sendTooManyPlayersEvent();
@@ -45,7 +47,7 @@ GameController.prototype._tryAddPlayer = function( gameId )
         {
             if ( !this.view )
             {
-                this._addPlayer( gamerId, i, gameId );
+                this._addPlayer( gamerId, gameId );
             }
         }
         exist = true;
@@ -56,7 +58,7 @@ GameController.prototype._tryAddPlayer = function( gameId )
 
 GameController.prototype._tryAddGame = function( gameId )
 {
-    if ( this.battleFields.length >= settings.MAX_GAMES )
+    if ( Object.keys( this.battleFields ).length >= settings.MAX_GAMES )
     {
         this._sendTooManyGamesEvent();
     }
@@ -76,11 +78,11 @@ GameController.prototype._sendTooManyGamesEvent = function( )
     console.log( 'too many games' );
 };
 
-GameController.prototype._addPlayer = function( gamerId, i, gameId )
+GameController.prototype._addPlayer = function( gamerId, gameId )
 {
-    this.battleFields[i].makeNewGamer( gamerId );
-    ++this.battleFields[i].countPlayers;
-    this.updateCountOfUser( this.battleFields[i].countPlayers, gameId );
+    this.battleFields[gameId].makeNewGamer( gamerId );
+    ++this.battleFields[gameId].countPlayers;
+    this.updateCountOfUser( this.battleFields[gameId].countPlayers, gameId );
 };
 
 GameController.prototype._loadGameParam = function( gameId )
@@ -91,25 +93,26 @@ GameController.prototype._loadGameParam = function( gameId )
 
 GameController.prototype._onGameParamLoaded = function( results )
 {
-    this.battleType = results[0].type;
+    this.asyncDbOperationResult.battleType = results[0].type;
     var mapType = results[0].map_type;
-    if ( this.battleType == settings.GAME_TYPES.FLAG_CAPTURE )
+    if ( this.asyncDbOperationResult.battleType == settings.GAME_TYPES.FLAG_CAPTURE ||
+        this.asyncDbOperationResult.battleType == settings.GAME_TYPES.AI )
     {
-        this.mapType = ( mapType == mapParams.DEFAULT_MAP ) ? mapParams.FLAG_DEFAULT_MAP : mapParams.FLAG_RANDOM_MAP;
+        this.asyncDbOperationResult.mapType = ( mapType == mapParams.DEFAULT_MAP ) ?
+            mapParams.FLAG_DEFAULT_MAP : mapParams.FLAG_RANDOM_MAP;
     }
     else
     {
-        this.mapType = mapType;
+        this.asyncDbOperationResult.mapType = mapType;
     }
-    this.countOfBots = results[0].bot_count;
+    this.asyncDbOperationResult.countOfBots = results[0].bot_count;
 };
 
-GameController.prototype.start = function( typeOfGame, typeOfMap, countOfBot, id )
+GameController.prototype.start = function( typeOfGame, typeOfMap, countOfBot, gameId )
 {
-    var len = this.battleFields.length;
-    this.battleFields[len] = new BattleField( typeOfGame, typeOfMap, id );
-    this.battleFields[len].completionGameChecker.beginGame();
-    this.battleFields[len].createBots( countOfBot );
+    this.battleFields[gameId] = new BattleField( typeOfGame, typeOfMap, gameId );
+    this.battleFields[gameId].gameRulesChecker.beginGame();
+    this.battleFields[gameId].createBots( countOfBot );
 };
 
 GameController.prototype.addAllPlayersToHall = function( tanks, gameId )
@@ -125,41 +128,27 @@ GameController.prototype.addAllPlayersToHall = function( tanks, gameId )
 
 GameController.prototype.addPlayerToHall = function( tankId, gameId )
 {
-    var i = this.getBattleField( gameId );
-    var name = this.battleFields[i].tanks[tankId].tankName;
-    var mark = this.battleFields[i].getTankMark( this.battleFields[i].tanks[tankId] );
-    var frags = this.battleFields[i].tanks[tankId].menu.frag;
-    var death = this.battleFields[i].tanks[tankId].menu.dead;
-    var battleType = this.battleFields[i].typeOfGame;
-    var date = this._getFormedDate( this.battleFields[i].date );
+    var name = this.battleFields[gameId].tanks[tankId].tankName;
+    var mark = this.battleFields[gameId].getTankMark( this.battleFields[gameId].tanks[tankId] );
+    var frags = this.battleFields[gameId].tanks[tankId].menu.frag;
+    var death = this.battleFields[gameId].tanks[tankId].menu.dead;
+    var battleType = this.battleFields[gameId].typeOfGame;
+    var date = this._getFormedDate( this.battleFields[gameId].date );
     this.db.insertToTablePlayer( tankId, name, mark, frags, death, battleType, date );
     this.db.deleteExtraPlayers();
 };
 
-GameController.prototype.getBattleField = function( gameId )
+GameController.prototype.areThereNotPlayers = function( gameId )
 {
-    for ( var i = 0; i < this.battleFields.length; ++i )
-    {
-        if ( gameId == this.battleFields[i].id )
-        {
-            return i;
-        }
-    }
-    return null;
+    return this.battleFields[gameId].countPlayers == 0;
 };
 
-GameController.prototype.areThereNotPlayers = function( i )
+GameController.prototype.deleteGame = function( gameId )
 {
-    return this.battleFields[i].countPlayers == 0;
-};
-
-GameController.prototype.deleteGame = function( i )
-{
-    console.log( "delete game", i );
-    var gameId = this.battleFields[i].id;
-    this.addAllPlayersToHall( this.battleFields[i].tanks, gameId);
+    console.log( "delete game", gameId );
+    this.addAllPlayersToHall( this.battleFields[gameId].tanks, gameId);
     this.db.deleteField( gameId );
-    this.battleFields.splice( i, 1 );
+    delete this.battleFields[gameId];
 
     console.log( "die game:", gameId );
 };
@@ -167,7 +156,8 @@ GameController.prototype.deleteGame = function( i )
 GameController.prototype.addGame = function( gameId )
 {
     var thisPtr = this;
-    this.start( this.battleType, this.mapType, this.countOfBots, gameId );
+    this.start( this.asyncDbOperationResult.battleType, this.asyncDbOperationResult.mapType,
+        this.asyncDbOperationResult.countOfBots, gameId );
     this._tryAddPlayer( gameId );
     this.intervals[gameId] = setInterval( function(){ thisPtr._updateGameData( gameId ); }, settings.GAME_INTERVAL )
 };
@@ -175,11 +165,6 @@ GameController.prototype.addGame = function( gameId )
 GameController.prototype.updateCountOfUser = function( countPlayers, gameId )
 {
     this.db.updateGameField( countPlayers, gameId );
-};
-
-GameController.prototype.getIndexBattleField = function( index )
-{
-    return this.battleFields[index].id;
 };
 
 GameController.prototype._getFormedDate = function( date )
@@ -192,16 +177,15 @@ GameController.prototype._getFormedDate = function( date )
 
 GameController.prototype._updateGameData = function( gameId )
 {
-    var i = this.getBattleField( gameId );
-    if ( this.battleFields.length != 0 && this.battleFields[i] )
+    if ( Object.keys( this.battleFields ).length != 0 && this.battleFields[gameId] )
     {
-        this.battleFields[i].updateData();
+        this.battleFields[gameId].updateData();
     }
 };
 
-GameController.prototype.isGameEnded = function( i )
+GameController.prototype.isGameEnded = function( gameId )
 {
-    return this.battleFields[i].isGameEnded();
+    return this.battleFields[gameId].isGameEnded();
 };
 
 GameController.prototype.getUpdatedData = function( battleField )

@@ -1,7 +1,7 @@
 var fs = require( 'fs' );
 var settings  = require( '../../GameSettings' );
 
-var StandartMap = function( mapName )
+var StandardMap = function( mapName )
 {
     this.mapName = mapName;
     this.mapParams   = settings.MAP_PARAMS;
@@ -12,7 +12,7 @@ var StandartMap = function( mapName )
     this._prepareMap();
 };
 
-StandartMap.prototype._prepareMap = function()
+StandardMap.prototype._prepareMap = function()
 {
     this._openAndReadFile();
     this._replaceSpacesAndTransfers();
@@ -21,7 +21,7 @@ StandartMap.prototype._prepareMap = function()
     fs.closeSync( this.fileHandle );
 };
 
-StandartMap.prototype._openAndReadFile = function()
+StandardMap.prototype._openAndReadFile = function()
 {
     switch ( this.mapName )
     {
@@ -39,13 +39,13 @@ StandartMap.prototype._openAndReadFile = function()
     this.data = fs.readSync( this.fileHandle, 500, null, 'ascii' );
 };
 
-StandartMap.prototype._replaceSpacesAndTransfers = function()
+StandardMap.prototype._replaceSpacesAndTransfers = function()
 {
     this.str = this.data[0].replace( /\r\n/g, "" );
     this.str = this.str.replace( /\n/g, "" );
 };
 
-StandartMap.prototype._fillMap = function()
+StandardMap.prototype._fillMap = function()
 {
     var k = 0;
     for( var i = 0; i < this.mapParams.COUNT_BRICK_I; i++ )
@@ -59,4 +59,4 @@ StandartMap.prototype._fillMap = function()
     }
 };
 
-module.exports = StandartMap;
+module.exports = StandardMap;

@@ -44,7 +44,7 @@ TankController.prototype.recreateTank = function( tank )
     return tank;
 };
 
-TankController.prototype.setToZeroTankPropeties = function( tank )
+TankController.prototype.setToZeroTankProperties = function( tank )
 {
     tank.health = 0;
     tank.menu.frag = 0;
@@ -111,7 +111,7 @@ TankController.prototype._tryChooseCorrectTankPosition = function( tank )
     var isCorrectPosition = false;
 
     var group = tank.group;
-    var point = this._getPointTankByGroup( group );
+    var point = this.battleField.gameRulesChecker.getTankPointByGroup( group );
     if ( this.battleField.walls[point.i][point.j].isGrass() )
     {
         tank.point.x = point.j * settings.MAP_PARAMS.CELL_WIDTH;
@@ -120,16 +120,6 @@ TankController.prototype._tryChooseCorrectTankPosition = function( tank )
     }
 
     return isCorrectPosition;
-};
-
-TankController.prototype._getPointTankByGroup = function( group )
-{
-    var minNumberString = 1;
-    var maxNumberString = settings.MAP_PARAMS.COUNT_BRICK_I - 1;
-    return {
-        i: ( group == 0 )? MathUtils.getRandomInteger( minNumberString, minNumberString + 1 ): MathUtils.getRandomInteger( maxNumberString - 1, maxNumberString ),
-        j: MathUtils.getRandomInteger( 1, settings.MAP_PARAMS.COUNT_BRICK_J - 1 )
-    }
 };
 
 module.exports = TankController;

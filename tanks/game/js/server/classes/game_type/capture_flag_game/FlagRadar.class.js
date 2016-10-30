@@ -2,22 +2,20 @@ var settings = require( '../../../GameSettings' );
 
 var FlagRadar = function( flag )
 {
+    this.NO_WINNER_GROUP = -1;
     this.size = 4;
     this.point = this._getPointRadar( flag );
-    this.capture = {
-        first: 0,
-        second: 0
-    };
-    this.isGroupInRadar = {
-        first: false,
-        second: false
-    };
+    this.captures = [0, 0, 0, 0, 0, 0, 0, 0];
+    this.groupsInRadar = [false, false, false, false, false, false, false, false];
 };
 
 FlagRadar.prototype.updateCapture = function( tanks )
 {
-    this.isGroupInRadar.first = 0;
-    this.isGroupInRadar.second = 0;
+    for ( var i = 0; i < this.groupsInRadar.length; ++i )
+    {
+        this.groupsInRadar[i] = false;
+    }
+
     for (var i = 0; i < tanks.length; i++)
     {
         this._updateCaptureByTank( tanks[i] );
@@ -27,23 +25,36 @@ FlagRadar.prototype.updateCapture = function( tanks )
 
 FlagRadar.prototype.isFlagCaptured = function()
 {
-    return this.capture.first > settings.TIME_FOR_FLAG_CAPTURE || this.capture.second > settings.TIME_FOR_FLAG_CAPTURE;
+    for ( var i = 0; i < this.captures.length; ++i )
+    {
+        if ( this.captures[i] > settings.TIME_FOR_FLAG_CAPTURE )
+        {
+            return true;
+        }
+    }
+    return false;
 };
 
 FlagRadar.prototype.getWinnerGroup = function()
 {
-    return ( this.capture.first > settings.TIME_FOR_FLAG_CAPTURE ) ? settings.GROUPS.FIRST: settings.GROUPS.SECOND;
+    for ( var i = 0; i < this.captures.length; ++i )
+    {
+        if ( this.captures[i] > settings.TIME_FOR_FLAG_CAPTURE )
+        {
+            return i;
+        }
+    }
+    return this.NO_WINNER_GROUP;
 };
 
 FlagRadar.prototype._setCaptureToZeroIfThereAreNotTank = function()
 {
-    if ( !this.isGroupInRadar.first )
+    for ( var i = 0; i < this.groupsInRadar.length; ++i )
     {
-        this.capture.first = 0;
-    }
-    if ( !this.isGroupInRadar.second )
-    {
-        this.capture.second = 0;
+        if ( ! this.groupsInRadar[i] )
+        {
+            this.captures[i] = 0;
+        }
     }
 };
 
@@ -57,16 +68,8 @@ FlagRadar.prototype._updateCaptureByTank = function( tank )
 
 FlagRadar.prototype._addCapture = function( tankGroup )
 {
-    if ( tankGroup == settings.GROUPS.FIRST )
-    {
-        this.capture.first++;
-        this.isGroupInRadar.first = true;
-    }
-    if ( tankGroup == settings.GROUPS.SECOND )
-    {
-        this.capture.second++;
-        this.isGroupInRadar.second = true;
-    }
+    ++this.captures[tankGroup];
+    this.groupsInRadar[tankGroup] = true;
 };
 
 FlagRadar.prototype._isTankOnRadar = function( tank )

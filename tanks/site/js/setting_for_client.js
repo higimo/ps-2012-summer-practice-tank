@@ -22,17 +22,23 @@ var playerName =
     SIZE:       11
 };
 
-var direction = {
+var direction =
+{
     'UP':    'up',
     'DOWN':  'down',
     'LEFT':  'left',
-    'RIGHT': 'right'
+    'RIGHT': 'right',
+
+    getAllDirections: function()
+    {
+        return [this.UP, this.DOWN, this.LEFT, this.RIGHT];
+    }
 };
 
 var setting = 
 {
     GAME_INTERVAL:      8,
-    SPECTATOR:         -1,
+    SPECTATOR_ID:       -1,
     MAX_GAMER_NAME_LEN: 16,
     MAX_GAME_NAME_LEN:  21,
     METALL_WALLS:       1,

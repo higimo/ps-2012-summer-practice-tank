@@ -9,16 +9,17 @@ function updateGameInfo()
         data: "",
         success: function( msg ){
             $( "#openGames" ).html( msg );
+            initEnterInGameHandler();
         }
     });
 }
 
-var enterInGameHandler = function()
+var initEnterInGameHandler = function()
 {
     $( '.enterInGame' ).click(
         function()
         {
-            console.log("click");
+            utils.toggleFileSelectionField( 'aiFileEnterInGame', this.getAttribute( 'data-game-mode' ) );
             var gameId = parseInt( this.id, 10 );
             var playerCount = parseInt( $( '#countUsers' + gameId ).html() );
             if ( playerCount <= 8 )
@@ -27,10 +28,10 @@ var enterInGameHandler = function()
             	var gameName = $( '#gameName'   + gameId ).html();
                 utils.setExitButton( '#exitButtonEnter', modal );
 
-	        $( '#gameNameModal'   ).html( $( '#gameName'   + gameId ).html() );
+                $( '#gameNameModal'   ).html( $( '#gameName'   + gameId ).html() );
                 $( '#gamerCountModal' ).html( $( '#countUsers' + gameId ).html() );
                 $( '#timeOutModal'    ).html( $( '#datBegin'   + gameId ).html() );
-                $( '#gameIdEnter'     ).val( gameId );              
+                $( '#gameIdEnter'     ).val( gameId );
                 $( '#gameNameEnter'   ).val( gameName );
 
                 $( '#enterSubmit' ).click(
@@ -57,5 +58,3 @@ var enterInGameHandler = function()
         }
     );
 };
-
-$( window ).ready( setInterval( enterInGameHandler ), 3000 );

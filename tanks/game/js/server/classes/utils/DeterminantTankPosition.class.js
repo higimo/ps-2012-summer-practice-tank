@@ -62,7 +62,7 @@ DeterminantTankPosition.prototype._isBarrierBetweenConstY = function( battleFiel
         min:Math.floor(object1.point.x / h),
         max:Math.floor(object2.point.x / h)
     };
-    this._sortMinMaxVarible( changingVariable );
+    this._sortMinMaxVariable( changingVariable );
 
     var isBarrier = this._isWallsBetweenQuadrate( 'constY', battleField, changingVariable, constantVariableForLeftCorner);
 
@@ -83,7 +83,7 @@ DeterminantTankPosition.prototype._isBarrierBetweenConstX = function( battleFiel
         min: Math.floor(object1.point.y / h),
         max: Math.floor(object2.point.y / h)
     };
-    this._sortMinMaxVarible( changingVariable );
+    this._sortMinMaxVariable( changingVariable );
 
     var isBarrier = this._isWallsBetweenQuadrate( 'constX', battleField, changingVariable, constantVariableForLeftCorner);
 
@@ -111,7 +111,7 @@ DeterminantTankPosition.prototype._isWallsBetweenQuadrate = function( constVar, 
 
 
 
-DeterminantTankPosition.prototype._sortMinMaxVarible = function( changingVariable )
+DeterminantTankPosition.prototype._sortMinMaxVariable = function( changingVariable )
 {
     var temp;
     if ( changingVariable.max < changingVariable.min )

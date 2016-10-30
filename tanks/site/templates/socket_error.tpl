@@ -9,7 +9,7 @@
       Попробуйте зайти в игру в течении следующих двух часов.
     </p>
     <div class="modal_navigation">
-      <div id="exitSocetError" class="exit_button"> На главную </div>
+      <div id="exitSocketError" class="exit_button"> На главную </div>
     </div>
   </div>
 </div>

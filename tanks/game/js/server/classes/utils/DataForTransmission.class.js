@@ -6,9 +6,8 @@ DataForTransmission.prototype.getFormedUpdateData = function( battleField )
         tanks:         this._getTankData( battleField.tanks ),
         weapons:       this._getWeaponData( battleField.weapons ),
         explosion:     this._getExplosionData( battleField.explosion ),
-        point:         battleField.point,
-        timeToGameEnd: this._getTimeToEndGame ( battleField.completionGameChecker ),
-        informationAboutCaptureFlagGame: this._getInformationAboutCaptureFlagGame( battleField.completionGameChecker )
+        timeToGameEnd: this._getTimeToEndGame ( battleField.gameRulesChecker ),
+        informationAboutCaptureFlagGame: this._getInformationAboutCaptureFlagGame( battleField.gameRulesChecker )
     }
 };
 
@@ -90,18 +89,18 @@ DataForTransmission.prototype._getFormedDataAboutOneExplosion = function( explos
     }
 };
 
-DataForTransmission.prototype._getTimeToEndGame = function( completionGameChecker )
+DataForTransmission.prototype._getTimeToEndGame = function( gameRulesChecker )
 {
-    return completionGameChecker.getTime();
+    return gameRulesChecker.getTime();
 };
 
-DataForTransmission.prototype._getInformationAboutCaptureFlagGame = function( completionGameChecker )
+DataForTransmission.prototype._getInformationAboutCaptureFlagGame = function( gameRulesChecker )
 {
-    if ( completionGameChecker.flag != null )
+    if ( gameRulesChecker.flag != null )
     {
         return {
-            flag: completionGameChecker.flag,
-            capture: completionGameChecker.flagRadar.capture
+            flag: gameRulesChecker.flag,
+            captures: gameRulesChecker.flagRadar.captures
         }
     }
     return false;

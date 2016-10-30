@@ -1,12 +1,12 @@
 var BattleFieldView = function()
- {
+{
     this.width          = 0;
     this.height         = 0;
     this.tanks          = new Array();
     this.weapons        = new Array();
     this.walls          = new Array();
     this.explosion      = new Array();
-    this.id             = -1;
+    this.id             = setting.SPECTATOR_ID;
     this.timeToGameEnd  = 0;
     this.drawUtils      = new DrawUtils();
     this.menuHandler    = new MenuHandler();
@@ -15,8 +15,8 @@ var BattleFieldView = function()
 
 BattleFieldView.prototype.startBattleFieldView = function( data )
 {
-    battleFieldView._init( data );
-    battleFieldView._start();
+    this._init( data );
+    this._start();
 };
 
 BattleFieldView.prototype.updateBattleFieldView = function( data )
@@ -24,9 +24,8 @@ BattleFieldView.prototype.updateBattleFieldView = function( data )
     this.tanks = data.tanks;
     this.weapons = data.weapons;
     this.explosion = data.explosion;
-    this.point = data.point;
     this.timeToGameEnd = data.timeToGameEnd;
-    this.informatiomAboutCaptureFlagGame = data.informationAboutCaptureFlagGame;
+    this.informationAboutCaptureFlagGame = data.informationAboutCaptureFlagGame;
 };
 
 BattleFieldView.prototype._init = function( data )
@@ -81,7 +80,7 @@ BattleFieldView.prototype._updateSmoke = function()
 
 BattleFieldView.prototype._updateMenu = function()
 {
-    if ( this.id != setting.SPECTATOR )
+    if ( this.id != setting.SPECTATOR_ID )
     {
         var menu = this.tanks[this.id].menu;
     }
@@ -160,13 +159,13 @@ BattleFieldView.prototype._drawTerrain = function()
             this.drawUtils.terrain( wall );
         }
     }
-    if ( this.informatiomAboutCaptureFlagGame )
+    if ( this.informationAboutCaptureFlagGame )
     {
-        this._drawInformatiomAboutCaptureFlagGame();
+        this._drawInformationAboutCaptureFlagGame();
     }
 };
 
-BattleFieldView.prototype._drawInformatiomAboutCaptureFlagGame = function()
+BattleFieldView.prototype._drawInformationAboutCaptureFlagGame = function()
 {
     this._drawFlag();
     this._drawCaptureFlag();
@@ -174,24 +173,93 @@ BattleFieldView.prototype._drawInformatiomAboutCaptureFlagGame = function()
 
 BattleFieldView.prototype._drawFlag = function()
 {
-    this.informatiomAboutCaptureFlagGame.flag.image = $( '#flag' )[0];
-    this.drawUtils.flag( this.informatiomAboutCaptureFlagGame.flag );
+    this.informationAboutCaptureFlagGame.flag.image = $( '#flag' )[0];
+    this.drawUtils.flag( this.informationAboutCaptureFlagGame.flag );
 };
 
 BattleFieldView.prototype._drawCaptureFlag = function()
 {
-    var capture = this.informatiomAboutCaptureFlagGame.capture;
-    var flagPoint = this.informatiomAboutCaptureFlagGame.flag.point;
+    var captures = this.informationAboutCaptureFlagGame.captures;
+    var numGroups = this._getNumberOfGroups();
 
-    var isView = this.id == setting.SPECTATOR;
-    if ( !isView )
+    var isView = this.id == setting.SPECTATOR_ID;
+    if ( numGroups > 2 && isView )
     {
-        var allyMark = ( this.tanks[this.id].group == 0 ) ? capture.first: capture.second;
-        var enemyMark = ( this.tanks[this.id].group == 0 ) ? capture.second: capture.first;
-
-        this.drawUtils.flagCaptureByAllies( flagPoint,  allyMark );
-        this.drawUtils.flagCaptureByEnemies( flagPoint,  enemyMark );
+        this._drawMaxCapturePercent( captures );
     }
+    else
+    {
+        this._drawTwoCapturesPercent( captures );
+    }
+};
+
+BattleFieldView.prototype._drawMaxCapturePercent = function( captures )
+{
+    var maxCapture = utils.getMaxOfArray( captures );
+    this._drawCapturePercent( maxCapture );
+};
+
+BattleFieldView.prototype._drawTwoCapturesPercent = function( captures )
+{
+    var myGroup = this._getMyGroup();
+    var allyMark = captures[myGroup];
+
+    var enemyCaptures = this._getEnemyCaptures();
+    var enemyMark = utils.getMaxOfArray( enemyCaptures );
+
+    this._drawCapturePercent( allyMark, false );
+    this._drawCapturePercent( enemyMark, true );
+};
+
+BattleFieldView.prototype._drawCapturePercent = function( mark, isEnemy /*= true */ )
+{
+    if ( isEnemy === undefined )
+    {
+        isEnemy = true;
+    }
+
+    var flagPoint = this.informationAboutCaptureFlagGame.flag.point;
+    if ( isEnemy )
+    {
+        this.drawUtils.flagCaptureByEnemies( flagPoint, mark );
+    }
+    else
+    {
+        this.drawUtils.flagCaptureByAllies( flagPoint, mark );
+    }
+};
+
+BattleFieldView.prototype._getEnemyCaptures = function()
+{
+    var captures = this.informationAboutCaptureFlagGame.captures;
+    var myGroup = this._getMyGroup();
+
+    var enemyCaptures = [];
+    for ( var i = 0; i < captures.length; ++i )
+    {
+        if ( i != myGroup )
+        {
+            enemyCaptures.push( captures[i] );
+        }
+    }
+
+    return enemyCaptures;
+}
+
+BattleFieldView.prototype._getMyGroup = function()
+{
+    var isView = this.id == setting.SPECTATOR_ID;
+    return ( isView ) ? setting.MY_TANK_GROUP : this.tanks[this.id].group;
+}
+
+BattleFieldView.prototype._getNumberOfGroups = function()
+{
+    var groups = [];
+    for ( var i = 0; i < this.tanks.length; ++i )
+    {
+        groups.push( this.tanks[i].group );
+    }
+    return utils.getUniqueArray( groups).length;
 };
 
 BattleFieldView.prototype._getImageForTerrain = function( wall )
@@ -226,7 +294,7 @@ BattleFieldView.prototype._getImageForTank = function( index )
     };
     var image = null;
     
-    var isView = this.id == setting.SPECTATOR;
+    var isView = this.id == setting.SPECTATOR_ID;
     
     if ( isView )
     {
@@ -256,5 +324,3 @@ BattleFieldView.prototype._drawSmoke = function()
         }
     }
 };
-
-var battleFieldView = new BattleFieldView();

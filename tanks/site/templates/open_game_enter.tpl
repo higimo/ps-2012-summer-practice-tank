@@ -16,16 +16,20 @@
         <td id="timeOutModal"></td>
       </tr>
     </table>
-    <form action="./game.php" method="POST">
+    <form action="./game.php" method="POST" enctype="multipart/form-data">
       <div class="input_field">
         Имя игрока
-        <input type="text" name="gamerName" id="gamerNameEnter" autofocus="true">
+        <input type="text" name="gamerName" id="gamerNameEnter" autofocus="true" />
       </div>
-      <input type="text" name="gameId" id="gameIdEnter" class="no_display">
-      <input type="text" name="gameName" id="gameNameEnter" class="no_display">
+      <div class="input_field no_display">
+        Файл ИИ
+        <input type="file" name="aiFile" id="aiFileEnterInGame" />
+      </div>
+      <input type="text" name="gameId" id="gameIdEnter" class="no_display" />
+      <input type="text" name="gameName" id="gameNameEnter" class="no_display" />
       <div class="input_field">
-        <div id="enterLoader" class="no_display"></div>
         <button id="enterSubmit" disabled="true">Вступить</button>
+        <div id="enterLoader" class="no_display clearfix"></div>
       </div>
     </form>
   </div>

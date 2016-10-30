@@ -381,8 +381,14 @@ p,
   width:      16px;
   height:     16px;
   background: url( '/images/loading.gif' );
-  float:      left;
-  position:   relative;
-  left:       235px;
-  top:        4px;
+  float:      right;
+  margin-top: 4px;
+  margin-right: 2px;
+}
+
+.clearfix:after
+{
+  content: '';
+  display: table;
+  clear: both;
 }

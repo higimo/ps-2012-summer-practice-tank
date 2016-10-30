@@ -35,18 +35,19 @@ CleverAi.prototype._step = function()
     }
     else
     {
-        this._atackEnemy();
+        this._attackEnemy();
     }
 };
 
 CleverAi.prototype._isCaptureFlag = function( typeOfGame )
 {
-    return ( typeOfGame == settings.GAME_TYPES.FLAG_CAPTURE ) ? this.radar.isCaptureFlag(): false;
+    return ( typeOfGame == settings.GAME_TYPES.FLAG_CAPTURE ||
+        typeOfGame == settings.GAME_TYPES.AI ) ? this.radar.isCaptureFlag(): false;
 };
 
-CleverAi.prototype._atackEnemy = function()
+CleverAi.prototype._attackEnemy = function()
 {
-    var isFired = this.gunner.atackIfSeeEnemy( this.battleField, this.indexTankAi );
+    var isFired = this.gunner.attackIfSeeEnemy( this.battleField, this.indexTankAi );
     if ( !isFired )
     {
         this._stepToEnemyOrFlag();

@@ -2,7 +2,7 @@
   <div class="modal_form">
       <div class="exit_button" id="exitButtonStart">X</div>
       <h1 class="modal_form_title">Создание новой игры</h1>
-      <form action="./game.php" method="POST" id="newGame" onsubmit="return false;">
+      <form action="./game.php" method="POST" id="newGame" enctype="multipart/form-data" onsubmit="return false;">
         <div class="input_field">
           Название игры
           <input type="text" name="gameName" id="gameName" autofocus="true" maxlength="20" />
@@ -14,10 +14,15 @@
         <input type="text" name="gameId" id="gameId" class="no_display">
         <div class="input_field">
           Режим игры
-          <select id="gameMode">
+          <select name="gameMode" id="gameMode">
             <option value="timer">Таймер</option>
             <option value="flag">Флаг</option>
+            <option value="ai">ИИ</option>
           </select>
+        </div>
+        <div class="input_field no_display">
+          Файл ИИ
+          <input type="file" name="aiFile" id="aiFileNewGame" />
         </div>
         <div class="input_field">
           Карта
@@ -40,8 +45,8 @@
           </select>
         </div>
         <div class="input_field">
-          <div id="loader" class="no_display"></div>
           <button id="startSubmit" disabled="true">Начать</button>
+          <div id="loader" class="no_display clearfix"></div>
         </div>
       </form>
   </div>

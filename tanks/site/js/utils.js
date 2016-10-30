@@ -72,4 +72,44 @@ Utils.prototype.clickOnStartHandler = function()
     );
 };
 
+// Делает видимым/невидимым поле для выбора файла в зависимости от gameMode
+Utils.prototype.toggleFileSelectionField = function( id, gameMode )
+{
+    var fileSelectionField = $( '#' + id ).parent();
+    if ( gameMode == 'ai' )
+    {
+        fileSelectionField.removeClass( 'no_display' );
+    }
+    else
+    {
+        fileSelectionField.addClass( 'no_display' );
+    }
+};
+
+Utils.prototype.isGameNameValid = function( gameName )
+{
+    return ( gameName.trim() != '' ) && ( gameName.length < setting.MAX_GAME_NAME_LEN );
+};
+
+Utils.prototype.isPlayerNameValid = function( playerName )
+{
+    return ( playerName.trim() != '' ) && ( playerName.length < setting.MAX_GAMER_NAME_LEN );
+};
+
+Utils.prototype.getMaxOfArray = function( numericArray )
+{
+    return Math.max.apply( null, numericArray );
+};
+
+// returns array with only unique elements
+Utils.prototype.getUniqueArray = function( array )
+{
+    return array.filter(
+        function( value, index, self )
+        {
+            return self.indexOf( value ) === index;
+        }
+    );
+};
+
 var utils = new Utils();

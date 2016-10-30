@@ -46,21 +46,10 @@
       <span id="node_port">{$nodePort}</span>
     </form>
   </div>
-  {$progresBar}
+  {$progressBar}
   {$noPlayers}
   {$serverCrash}
+  {$botError}
 </div>
-<script type="text/javascript" src="./js/keyPress.js"></script>
-<script type="text/javascript" src="./js/setting_for_client.js"></script>
-<script type="text/javascript" src="./js/utils.js"></script>
-
-<script type="text/javascript" src="./js/classes/SmokeHandler.class.js"></script>
-<script type="text/javascript" src="./js/classes/GameMenuHandler.class.js"></script>
-<script type="text/javascript" src="./js/classes/DrawUtils.class.js"></script>
-<script type="text/javascript" src="./js/classes/Smoke.class.js"></script>
-<script type="text/javascript" src="./js/classes/BattleFieldView.class.js"></script>
-
-<script type="text/javascript" src="./js/classes/index_page/ProgressBar.js"></script>
-
+{$gameScripts}
 <script type="text/javascript" src="http://{$nodeHost}:{$nodePort}/socket.io/lib/socket.io.js"></script>
-<script type="text/javascript" src="./js/client.js"></script>

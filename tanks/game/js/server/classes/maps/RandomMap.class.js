@@ -18,7 +18,7 @@ RandomMap.prototype._prepareMap = function()
     this._createArr();
     this._createBarrier();
     this._getAndPushRandomPoints();
-    this._makeLabirint();
+    this._makeLabyrinth();
     this._createWalls();
     if ( this.mapType == mapParams.FLAG_RANDOM_MAP )
     {
@@ -56,7 +56,7 @@ RandomMap.prototype._getAndPushRandomPoints = function()
     } );
 };
 
-RandomMap.prototype._makeLabirint = function()
+RandomMap.prototype._makeLabyrinth = function()
 {
     for ( var i = 0; i < this.currPoints.length; ++i )
     {

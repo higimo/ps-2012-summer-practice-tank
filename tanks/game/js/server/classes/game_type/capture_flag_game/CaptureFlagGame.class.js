@@ -1,21 +1,20 @@
-var ExplosionController   = require( '../../ExplosionController.class' );
-var settings              = require( '../../../GameSettings' );
-var GameTimer             = require( '../game_timer/GameTimer.class' );
-var FlagRadar             = require( './FlagRadar.class' );
-var Flag                  = require( './Flag.class' );
+var BaseGame            = require( '../BaseGame.class' );
+var ExplosionController = require( '../../ExplosionController.class' );
+var FlagRadar           = require( './FlagRadar.class' );
+var Flag                = require( './Flag.class' );
+var settings            = require( '../../../GameSettings' );
 
 var CaptureFlagGame = function( battleField )
 {
+    BaseGame.call( this );
     this.battleField = battleField;
-    this.timer = new GameTimer();
     this.flag  = new Flag();
     this.flagRadar = new FlagRadar( this.flag );
+    this.NO_WINNER_GROUP = this.flagRadar.NO_WINNER_GROUP;
 };
 
-CaptureFlagGame.prototype.beginGame = function()
-{
-    this.timer.init( settings.GAME_TIME );
-};
+CaptureFlagGame.prototype = Object.create( BaseGame.prototype );
+CaptureFlagGame.prototype.constructor = CaptureFlagGame;
 
 CaptureFlagGame.prototype.isGameEnded = function()
 {
@@ -29,17 +28,12 @@ CaptureFlagGame.prototype.isGameEnded = function()
     return isTimeEnded || isFlagCapture;
 };
 
-CaptureFlagGame.prototype.getTime = function()
-{
-    return this.timer.getTime();
-};
-
 CaptureFlagGame.prototype.getWinnerGroup = function()
 {
     return this.flagRadar.getWinnerGroup();
 };
 
-CaptureFlagGame.prototype._explodeLoserTanks =function()
+CaptureFlagGame.prototype._explodeLoserTanks = function()
 {
     var winnerGroup = this.getWinnerGroup();
     for ( var i = 0; i < this.battleField.tanks.length; i++)
@@ -51,14 +45,37 @@ CaptureFlagGame.prototype._explodeLoserTanks =function()
     }
 };
 
-CaptureFlagGame.prototype._explodeTank =function( tank )
+CaptureFlagGame.prototype._explodeTank = function( tank )
 {
     if ( tank.health > 0 )
     {
-        this.battleField.tankController.setToZeroTankPropeties( tank );
         ExplosionController.explodeTank( tank, this.battleField );
     }
 };
 
-module.exports = CaptureFlagGame;
+CaptureFlagGame.prototype.getTankMark = function( tank )
+{
+    var score = BaseGame.prototype.getTankMark.call( this, tank );
+    if ( tank.group == this.getWinnerGroup() )
+    {
+        score += this._countEnemies( tank );
+    }
+    return score;
+};
 
+CaptureFlagGame.prototype._countEnemies = function( tank )
+{
+    var enemiesCount = 0;
+
+    for ( var i = 0; i < this.battleField.tanks.length; ++i )
+    {
+        if ( this.battleField.tanks[i].group != tank.group )
+        {
+            ++enemiesCount;
+        }
+    }
+
+    return enemiesCount;
+};
+
+module.exports = CaptureFlagGame;

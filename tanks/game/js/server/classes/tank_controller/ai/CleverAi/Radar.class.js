@@ -98,11 +98,11 @@ Radar.prototype._noteRoadBack = function()
     while ( lastLabel != 0 && countStep < this.maxLenghtRoad )
     {
         countStep++;
-        lastCoordinate = this._seachForLabel( lastLabel--, lastCoordinate );
+        lastCoordinate = this._searchForLabel( lastLabel--, lastCoordinate );
     }
 };
 
-Radar.prototype._seachForLabel = function( label, coordinate )
+Radar.prototype._searchForLabel = function( label, coordinate )
 {
     var upSquare = ( this._isCoordinateNotOutOfBounds(coordinate.x - 1) && this._isCoordinateNotOutOfBounds(coordinate.y) ) ? this.visibilityArea[coordinate.x - 1][coordinate.y]: this.typesOfUnit.wall;
     var downSquare = ( this._isCoordinateNotOutOfBounds(coordinate.x + 1) && this._isCoordinateNotOutOfBounds(coordinate.y) ) ? this.visibilityArea[coordinate.x + 1][coordinate.y]: this.typesOfUnit.wall;
@@ -204,7 +204,8 @@ Radar.prototype._getRadar = function()
 {
     this._initializationVisibilityArea();
     this._setCoordinateRadarOnMap();
-    if ( this.battleField.typeOfGame == settings.GAME_TYPES.FLAG_CAPTURE )
+    if ( this.battleField.typeOfGame == settings.GAME_TYPES.FLAG_CAPTURE ||
+        this.battleField.typeOfGame == settings.GAME_TYPES.AI )
     {
         this._noteFlagAreaOnVisibilityArea();
     }
@@ -271,7 +272,7 @@ Radar.prototype._noteEnemyOnVisibilityArea = function( coordinate )
 
 Radar.prototype._noteFlagAreaOnVisibilityArea = function()
 {
-    var flagRadar = this.battleField.completionGameChecker.flagRadar;
+    var flagRadar = this.battleField.gameRulesChecker.flagRadar;
     for ( var i = 0; i < flagRadar.size; i++ )
     {
         for ( var j = 0; j < flagRadar.size; j++ )
@@ -292,11 +293,11 @@ Radar.prototype._noteFlagAreaOnVisibilityArea = function()
 
 Radar.prototype._isObjectInVisibilityArea = function( coordinates )
 {
-    var isIngestedHorisontal = ( coordinates .x >= this.coordinateRadarBeginningOnMap.x && coordinates .x <= this.coordinateRadarBeginningOnMap.x + this.sizeOfVisibilityArea );
+    var isIngestedHorizontal = ( coordinates .x >= this.coordinateRadarBeginningOnMap.x && coordinates .x <= this.coordinateRadarBeginningOnMap.x + this.sizeOfVisibilityArea );
     var isIngestedVertical = ( coordinates .y >= this.coordinateRadarBeginningOnMap.y && coordinates .y <= this.coordinateRadarBeginningOnMap.y + this.sizeOfVisibilityArea );
-    var isNotViolatedBoundariesHorisontal = ( coordinates .x - this.coordinateRadarBeginningOnMap.x < this.sizeOfVisibilityArea );
+    var isNotViolatedBoundariesHorizontal = ( coordinates .x - this.coordinateRadarBeginningOnMap.x < this.sizeOfVisibilityArea );
     var isNotViolatedBoundariesVertical = ( coordinates .y - this.coordinateRadarBeginningOnMap.y < this.sizeOfVisibilityArea );
-    return ( isIngestedHorisontal && isIngestedVertical && isNotViolatedBoundariesHorisontal && isNotViolatedBoundariesVertical )
+    return ( isIngestedHorizontal && isIngestedVertical && isNotViolatedBoundariesHorizontal && isNotViolatedBoundariesVertical )
 };
 
 Radar.prototype._initializationVisibilityArea = function()

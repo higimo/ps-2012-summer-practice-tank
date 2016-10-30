@@ -1,5 +1,5 @@
 var RandomUtil   = require('./RandomMap.class');
-var StandartUtil = require('./StandartMap.class');
+var StandardUtil = require('./StandardMap.class');
 var Wall         = require('./Wall.class');
 var settings     = require( '../../GameSettings' );
 var mapParams = settings.MAP_PARAMS;
@@ -23,7 +23,7 @@ MapCreator.prototype._checkMap = function()
     {
         case mapParams.DEFAULT_MAP:
         {
-            this.currMap = new StandartUtil( mapParams.DEFAULT_MAP );
+            this.currMap = new StandardUtil( mapParams.DEFAULT_MAP );
             break;
         }
         case mapParams.RANDOM_MAP:
@@ -33,7 +33,7 @@ MapCreator.prototype._checkMap = function()
         }
         case mapParams.FLAG_DEFAULT_MAP:
         {
-            this.currMap = new StandartUtil( mapParams.FLAG_DEFAULT_MAP );
+            this.currMap = new StandardUtil( mapParams.FLAG_DEFAULT_MAP );
             break;
         }
         case mapParams.FLAG_RANDOM_MAP:

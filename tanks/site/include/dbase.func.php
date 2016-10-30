@@ -17,7 +17,7 @@
     
     function setGame( $nameGame, $battleType, $mapType, $countOfBots )
     {
-        $query = sprintf( "INSERT INTO `game` VALUES ( null, '%s', CURRENT_TIME( '' ), 1, '%s', '%s', %d, 0 );",
+        $query = sprintf( "INSERT INTO `game` VALUES ( null, '%s', CURRENT_TIME(), 1, '%s', '%s', %d, 0 );",
 		         escapeSql( $nameGame ), escapeSql( $battleType ), escapeSql( $mapType ), escapeSql( $countOfBots ) );
         executeQuery( $query );
     }
@@ -27,5 +27,12 @@
         $query  = "SELECT MAX(game_id) FROM `game`;";
         $result = getQueryResults( $query );
         return ( int ) ( $result[0]["MAX(game_id)"] );
+    }
+
+    function getGame($gameId)
+    {
+        $query  = sprintf("SELECT * FROM `game` WHERE `game_id` = '%s';", escapeSql($gameId));
+        $result = getQueryResults( $query );
+        return $result[0];
     }
 ?>

@@ -5,8 +5,9 @@ var ExplosionController   = require( './ExplosionController.class' );
 var RocketController      = require( './RocketController.class' );
 var ShotController        = require( './ShotController.class' );
 var CollisionsDeterminant = require( './utils/CollisionsDeterminant.class' );
-var CompletionGameChecker = require( './game_type/CompletionGameChecker.class' );
+var GameRulesChecker = require( './game_type/GameRulesChecker.class' );
 var TankController        = require( './tank_controller/TankController.class' );
+var helperFunctions       = require( '../../common/utils/helperFunctions' );
 
 var BattleField = function( typeOfGame, typeOfMap, gameId )
 {
@@ -17,12 +18,11 @@ var BattleField = function( typeOfGame, typeOfMap, gameId )
     this.weapons   = new Array();
     this.walls     = map.gameGrid;
     this.explosion = new Array();
-    this.point     = { first: 0, second: 0 };
     this.id        = gameId;
     this.countPlayers = 0;
     this.typeOfGame = typeOfGame;
     this.date      = new Date();
-    this.completionGameChecker = new CompletionGameChecker( this );
+    this.gameRulesChecker = new GameRulesChecker( this );
     this.tankController = new TankController( this );
 };
 
@@ -36,11 +36,70 @@ BattleField.prototype.onKeyUpHandler = function( keyCode, id )
     KeyboardHandler.onKeyUpHandler( keyCode, id, this );
 };
 
+BattleField.prototype.onMoveHandler = function( moveData, id )
+{
+    var fixedData = this._fixMoveData( moveData );
+    this._setBotDirection( fixedData, id );
+    this._setBotAttack( fixedData, id );
+};
+
+BattleField.prototype._setBotDirection = function( moveData, id )
+{
+    if ( moveData.direction == settings.AI.MOVE.NONE )
+    {
+        this.tanks[id].moves = false;
+        this.tanks[id].directInBottleneck.isBottleneck = false;
+    }
+    else
+    {
+        var directions = [null, settings.DIRECTION.UP, settings.DIRECTION.RIGHT, settings.DIRECTION.DOWN, settings.DIRECTION.LEFT];
+        this.tanks[id].moves = true;
+        this.tanks[id].route = directions[moveData.direction];
+    }
+};
+
+BattleField.prototype._setBotAttack = function( moveData, id )
+{
+    this.tanks[id].attack = moveData.fire && this.tanks[id].shot.recharge <= 0;
+};
+
+BattleField.prototype._fixMoveData = function( moveData )
+{
+    var defaultMove =
+    {
+        direction: settings.AI.MOVE.NONE,
+        fire: 0
+    };
+
+    var fixedData = moveData;
+
+    if ( !fixedData || typeof fixedData !== 'object' )
+    {
+        fixedData = defaultMove;
+        return fixedData;
+    }
+
+    for ( var key in defaultMove )
+    {
+        if ( !fixedData.hasOwnProperty( key ) )
+        {
+            fixedData[key] = defaultMove[key];
+        }
+    }
+
+    if ( !( fixedData.direction in helperFunctions.getArrayFromObject( settings.AI.MOVE ) ) )
+    {
+        fixedData.direction = defaultMove.direction;
+    }
+
+    return fixedData;
+};
+
 BattleField.prototype.createBots = function( countOfBot )
 {
     for ( var i = 0; i < countOfBot; ++i )
     {
-        this.tanks[i] = this.tankController.createBot( this._getGroup(i), i );
+        this.tanks[i] = this.tankController.createBot( this.gameRulesChecker.getGroup( i ), i );
     }
 };
 
@@ -55,7 +114,7 @@ BattleField.prototype.updateData = function()
 
 BattleField.prototype.isGameEnded = function()
 {
-    return this.completionGameChecker.isGameEnded( this.tanks );
+    return this.gameRulesChecker.isGameEnded( this.tanks );
 };
 
 BattleField.prototype._checkCollisions = function()
@@ -114,7 +173,7 @@ BattleField.prototype._explodeTank = function( tank, weapon )
     ExplosionController.explodeTank( tank, this );
 
     var tankKiller = this.tanks[weapon.tankId];
-    this._updateScore( tank, tankKiller );
+    this._updateScoreAfterFrag( tank, tankKiller );
     this.tankController.recreateTank( tank );
 };
 
@@ -129,45 +188,17 @@ BattleField.prototype._updateTanks = function()
     }
 };
 
-BattleField.prototype._updateScore = function( tank, tankKiller )
+BattleField.prototype._updateScoreAfterFrag = function( tank, tankKiller )
 {
-    ++tank.menu.dead;
-    if ( tank.group != tankKiller.group )
+    if ( tank.group == tankKiller.group )
     {
-        this._addPoint( tankKiller );
+        ++tankKiller.friendlyKills;
+        ++tankKiller.menu.dead;
     }
     else
     {
-        this._removePoint( tankKiller );
-    }
-    ++tankKiller.menu.frag;
-};
-
-BattleField.prototype._addPoint = function( tank )
-{
-    if ( tank.group == settings.GROUPS.FIRST )
-    {
-        ++this.point.first;
-    }
-    if ( tank.group == settings.GROUPS.SECOND )
-    {
-        ++this.point.second;
-    }
-};
-
-BattleField.prototype._removePoint = function( tank )
-{
-    if ( tank.group == settings.GROUPS.FIRST )
-    {
-        --this.point.first;
-    }
-    if ( tank.group == settings.GROUPS.SECOND )
-    {
-        --this.point.second;
-    }
-    if ( ( tank.group != settings.GROUPS.FIRST ) || ( tank.group != settings.GROUPS.SECOND ) )
-    {
-        ++tank.friendlyKills;
+        ++tank.menu.dead;
+        ++tankKiller.menu.frag;
     }
 };
 
@@ -191,24 +222,19 @@ BattleField.prototype.getIdOfLastGamer = function()
     return this.lastGamerId;
 };
 
-BattleField.prototype._getGroup = function( id )
-{
-    return ( id % 2 == 0 ) ? 0 : 1;
-};
-
 BattleField.prototype.makeNewGamer = function( id, nameUser )
 {
     if ( id != settings.VIEW_USER )
     {
         console.log( 'enter gamerId: ' + id );
-        var group = this._getGroup(id);
+        var group = this.gameRulesChecker.getGroup( id );
         this.tanks[id] = this.tankController.createPlayer( group, nameUser );
     }
 };
 
 BattleField.prototype.deleteGamer = function( id )
 {
-    this.tankController.setToZeroTankPropeties( this.tanks[id] );
+    this.tankController.setToZeroTankProperties( this.tanks[id] );
     --this.countPlayers;
     console.log( 'exit gamer id: ' + id );
 };
@@ -257,34 +283,9 @@ BattleField.prototype._getScoreForTank = function( currentTank )
     };
 };
 
-BattleField.prototype.getTankMark = function( currentTank )
+BattleField.prototype.getTankMark = function( tank )
 {
-    var score = 0;
-    var maxKoef = 1.5;
-    var minKoef = 0.9;
-    if ( currentTank.menu.dead != 0 )
-    {
-        score = Math.round( ( currentTank.menu.frag / currentTank.menu.dead ) * 10 ) / 10;
-    }
-    else
-    {
-        if ( currentTank.menu.frag == 0 )
-        {
-            score = -1;
-        }
-        else
-        {
-            var maxScore = Math.round( ( currentTank.menu.frag * maxKoef ) * 10 ) / 10;
-            score = ( currentTank.friendlyKills == 0 ) ? maxScore : currentTank.menu.frag;
-        }
-    }
-    if ( currentTank.friendlyKills != 0 )
-    {
-
-        score = score * ( minKoef / currentTank.friendlyKills );
-    }
-
-    return Math.round( score * 10 ) / 10;
+    return this.gameRulesChecker.getTankMark( tank );
 };
 
 module.exports = BattleField;

@@ -11,7 +11,7 @@ var SimpleAi = function( battleField, indexTankAi )
 
 SimpleAi.prototype.doStep = function()
 {
-    var isFired = this.gunner.atackIfSeeEnemy( this.battleField, this.indexTankAi );
+    var isFired = this.gunner.attackIfSeeEnemy( this.battleField, this.indexTankAi );
     if ( !isFired )
     {
         this.randomMove.move( this.battleField, this.indexTankAi );

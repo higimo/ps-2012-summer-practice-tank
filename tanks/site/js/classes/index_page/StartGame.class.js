@@ -15,8 +15,17 @@ StartGameHandler.prototype.setEvents = function()
                 thisPtr.clickOnStartHandler( thisPtr, this );
             } );
 
-            $( '#gameName'  ).keyup( thisPtr.unfreezeStartButton );
-            $( '#gamerName' ).keyup( thisPtr.unfreezeStartButton );
+            $( '#gameName'  ).keyup( function() { thisPtr.tryUnfreezeStartButton(); } );
+            $( '#gamerName' ).keyup( function() { thisPtr.tryUnfreezeStartButton(); } );
+
+            utils.toggleFileSelectionField( 'aiFileNewGame', $( '#gameMode' ).val() );
+        }
+    );
+
+    $( '#gameMode' ).change(
+        function( event )
+        {
+            utils.toggleFileSelectionField( 'aiFileNewGame', event.target.value );
         }
     );
 };
@@ -40,12 +49,10 @@ StartGameHandler.prototype.clickOnStartHandler = function( form, button )
     );
 };
 
-StartGameHandler.prototype.unfreezeStartButton = function()
+StartGameHandler.prototype.tryUnfreezeStartButton = function()
 {
     var button = $( '#startSubmit' );
-    if ( ( $( '#gameName' ).val() != '' ) && ( $( '#gamerName' ).val() != '' ) &&
-       ( $( '#gamerName' ).val().length < setting.MAX_GAMER_NAME_LEN ) &&
-       ( $( '#gameName' ).val().length < setting.MAX_GAME_NAME_LEN ) )
+    if ( this.isFormValid() )
     {
         button.removeAttr( 'disabled' );
     }
@@ -55,14 +62,12 @@ StartGameHandler.prototype.unfreezeStartButton = function()
     }
 };
 
-StartGameHandler.prototype.correctForm = function()
+StartGameHandler.prototype.isFormValid = function()
 {
     var gameName   = $( '#gameName'  ).val();
     var playerName = $( '#gamerName' ).val();
 
-    return ( ( gameName   != '' ) && ( gameName.length   < setting.MAX_GAME_NAME_LEN  ) &&
-             ( playerName != '' ) && ( playerName.length < setting.MAX_GAMER_NAME_LEN ) );
-
+    return utils.isGameNameValid( gameName ) && utils.isPlayerNameValid( playerName );
 };
 
 StartGameHandler.prototype.sendForm = function( id )
@@ -70,7 +75,7 @@ StartGameHandler.prototype.sendForm = function( id )
     var form        = $( '#newGame' );
     var gameIdField = $( '#gameId'  );
 
-    if ( this.correctForm() )
+    if ( this.isFormValid() )
     {
         gameIdField.val( id );
         form[0].submit();
@@ -83,5 +88,6 @@ $( window ).ready(
     {
         var startGameHandler = new StartGameHandler();
         startGameHandler.setEvents();
+        startGameHandler.tryUnfreezeStartButton();
     }
 );

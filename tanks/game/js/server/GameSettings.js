@@ -1,4 +1,6 @@
-﻿var Map =
+﻿var AiSettings = require( './AiSettings' );
+
+var Map =
 {
     'COUNT_BRICK_I': 14,
     'COUNT_BRICK_J': 24,
@@ -16,7 +18,8 @@ Map.FIELD_HEIGHT = Map.COUNT_BRICK_I * Map.CELL_WIDTH;
 var gameTypes =
 {
     'FLAG_CAPTURE': 'flag',
-    'TIMER': 'timer'
+    'TIMER': 'timer',
+    'AI': 'ai'
 };
 
 var aiTypes =
@@ -47,7 +50,8 @@ var weaponSize =
 
 var settings =
 {
-    GAME_TIME: 300000, //5 минут
+    //GAME_TIME: 300000, //5 минут
+    GAME_TIME: 120000, //2 минуты
     GAME_INTERVAL: 8,
     MAX_GAMER: 15,
     UPDATE_GAME: 30,
@@ -68,7 +72,8 @@ var settings =
     GAME_TYPES: gameTypes,
     VIEW_USER: -1,
     TIME_FOR_FLAG_CAPTURE: 1000, // миллисекунд
-    WEAPONS_DIMENSION: weaponSize
+    WEAPONS_DIMENSION: weaponSize,
+    AI: AiSettings
 };
 
 module.exports = settings; 

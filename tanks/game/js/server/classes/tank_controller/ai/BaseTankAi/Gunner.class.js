@@ -8,7 +8,7 @@ var Gunner = function()
     this.indexTankAi = null;
 };
 
-Gunner.prototype.atackIfSeeEnemy = function( battleField, indexTankAi )
+Gunner.prototype.attackIfSeeEnemy = function( battleField, indexTankAi )
 { 
     this._rememberTankInfo( indexTankAi );
     this.atack = true;

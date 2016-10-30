@@ -27,12 +27,12 @@ TankMoving.prototype.doNextStep = function( battleField, currentTank, route )
         
         if ( !isCollisionWithTanks )
         {
-            this.stepToBottlneck( currentTank, route, battleField );
+            this.stepToBottleneck( currentTank, route, battleField );
         }
     }
 };
 
-TankMoving.prototype.stepToBottlneck = function( currentTank, route, battleField )
+TankMoving.prototype.stepToBottleneck = function( currentTank, route, battleField )
 {
     var bottleneck = this.goToBottleneck( currentTank, route, battleField.walls );
     if ( bottleneck.goToBottleneck )
