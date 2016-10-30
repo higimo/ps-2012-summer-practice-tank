@@ -1,0 +1,9 @@
+Listen 127.0.0.7:80
+NameVirtualHost tanks.local
+<VirtualHost tanks.local>
+    ServerAdmin webmaster@host.some_domain.com
+    DocumentRoot D:/server/www/tanks/site/
+    ServerName tanks.local
+    ErrorLog logs/tanks-error.log
+    CustomLog logs/tanks-access.log common
+</VirtualHost>

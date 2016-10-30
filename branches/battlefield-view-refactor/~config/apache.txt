@@ -1,0 +1,9 @@
+Listen 127.0.0.7:80
+NameVirtualHost tanksGame.ru
+<VirtualHost tanksGame.ru>
+    ServerAdmin webmaster@host.some_domain.com
+    DocumentRoot C:/home/tanksGame.ru/site/
+    ServerName tanksGame.ru
+    ErrorLog logs/host.tanksGame.ru.com-error_log
+    CustomLog logs/host.tanksGame.ru.com-access_log common
+</VirtualHost>

@@ -1,0 +1,1 @@
+var Flame = function(){    this.point        = { x: 0, y: 0};    this.image        = null;    this.speed        = 0;    this.dimension    = { width: 10, height: 5 };};module.exports = Flame;
