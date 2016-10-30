@@ -1,0 +1,1 @@
+var Explosion = function(){    this.point     = { x: 0, y: 0 };    this.dimension = { width: 40, height: 40 };    this.timeLife  = 150;    this.image     = null;    this.rotate    = 0;    this.type      = 'rocket';}module.exports = Explosion;

@@ -1,1 +1,0 @@
-var Smoke = function( xPos, yPos ){    this.point     = { x: xPos, y: yPos };    this.dimension = { width: 8, height: 8 };    this.image     = null;    this.timeLife  = 70;};
